@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+ 
+model Candidat {
+  id_candidat       String   @id @default(auto()) @map("_id") @db.ObjectId
+  numeroInscription Int      @unique
+  nom               String
+  prenoms           String?
+  date_naissance    DateTime
+  sexe              SEXE
+  isApte            Boolean
+  choix             Choix[]
+}
+
+model Groupe {
+  id_groupe    String   @id @default(auto()) @map("_id") @db.ObjectId
+  numero       Int
+  date_epreuve DateTime
+  temps        TEMPS
+  heure        String
+  id_examinateur String @db.ObjectId
+  terrainId String @db.ObjectId
+  examinateur Examinateur @relation(fields: [id_examinateur], references: [id_examinateur])
+  terrain Terrain @relation(fields: [terrainId], references: [id_terrain])
+}
+
+model Examinateur {
+  id_examinateur  String @id @default(auto()) @map("_id") @db.ObjectId
+  nom_examinateur String
+  groupes Groupe[]
+}
+
+model Terrain {
+  id_terrain  String @id @default(auto()) @map("_id") @db.ObjectId
+  nom_terrain String
+  id_centre String @db.ObjectId
+  centre Centre @relation(fields: [id_centre], references: [id_centre])
+  groupes Groupe[]
+}
+
+model Centre {
+  id_centre String @id @default(auto()) @map("_id") @db.ObjectId
+  lieu      String
+  terrains Terrain[]
+}
+
+model Choix {
+  id_choix    String @id @default(auto()) @map("_id") @db.ObjectId
+  id_candidat String @db.ObjectId
+  id_sport    String @db.ObjectId
+  candidat Candidat @relation(fields: [id_candidat], references: [id_candidat])
+  sport    Sport    @relation(fields: [id_sport], references: [id_sport])
+}
+
+model Sport {
+  id_sport  String     @id @default(auto()) @map("_id") @db.ObjectId
+  nom_sport String
+  type      TYPE_SPORT
+  choix     Choix[]
+}
+
+model Utilisateur{
+  id_utilisateur String     @id @default(auto()) @map("_id") @db.ObjectId
+  nom_complet String
+  password String
+  email String @unique
+} 
+enum SEXE {
+  HOMME
+  FILLE
+}
+
+enum TEMPS {
+  MATIN
+  APRES_MIDI
+}
+
+enum TYPE_SPORT {
+  INDIVIDUEL
+  COLLECTIF
+  COURSE_FOND
+}
